@@ -31,13 +31,17 @@ done
 print "\n【怎么选】输入一个编号，敲一个空格，再输入下一个编号，最后按回车。"
 print "   例：只装 1 号      →  输入  1  回车"
 print "   例：装 1、3、5 号  →  输入  1 3 5  回车"
-print "   直接回车 或 输入 a = 全部安装；输入 q = 退出"
+print "   想【全部安装】：输入  全部  （或 QB / A，大小写都行）回车"
+print "   想退出：输入  q  回车"
 if [[ -n "$PICK" ]]; then ans="$PICK"; else read -r "ans?你的选择: " < /dev/tty; fi
 
 chosen=()
+setopt extended_glob
+ans=${${ans##[[:space:]]##}%%[[:space:]]##}   # 去掉首尾空格
 case "${ans:l}" in
   q) print "已退出"; exit 0 ;;
-  ""|a|all) chosen=({1..$N}) ;;
+  "") print "没有输入任何内容，已退出。想全部安装请输入：全部"; exit 0 ;;
+  a|all|qb|qw|全部|全选) chosen=({1..$N}) ;;
   *)
     for t in ${(s: :)${ans//,/ }}; do
       if [[ "$t" == <-> ]] && (( t >= 1 && t <= N )); then chosen+=($t)
