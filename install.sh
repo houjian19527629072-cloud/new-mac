@@ -106,7 +106,7 @@ cache_workbuddy() {
   [[ $destination == /* ]] || return 1
 
   headers=$run_dir/headers part=$run_dir/part archive=$run_dir/"$cask.dmg"
-  local -a download_options=(-fsSL --connect-timeout 15 --max-time 45 --retry 2 --retry-max-time 100)
+  local -a download_options=(-fsSL --connect-timeout 15 --max-time 45 --retry 2 --retry-all-errors --retry-max-time 100)
   result=$(curl "${download_options[@]}" --range 0-0 --max-filesize 1 -D "$headers" -o "$part" -w '%{http_code}' "$url") || return 1
   [[ $result == 206 ]] || return 1
   total=$(awk 'tolower($1) == "content-range:" && $2 == "bytes" && $3 ~ /^0-0\// { split($3, parts, "/"); sub(/[^0-9]+$/, "", parts[2]); print parts[2] }' "$headers") || return 1
@@ -146,7 +146,7 @@ if (( ${#brew_items[@]} )); then
       print -u2 '首次安装 Homebrew 需要在终端确认。'
       exit 1
     fi
-    bootstrap=$(curl -fsSL --connect-timeout 15 --max-time 60 https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) || exit 1
+    bootstrap=$(curl -fsSL --connect-timeout 15 --max-time 60 --retry 2 --retry-all-errors --retry-max-time 90 https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh) || exit 1
     [[ -n $bootstrap ]] && /bin/bash -c "$bootstrap" </dev/tty || exit 1
     brew_bin=$(find_brew) || { print -u2 'Homebrew 没有安装成功。'; exit 1; }
   fi
@@ -157,7 +157,7 @@ if (( ${#brew_items[@]} )); then
   trap '[[ -z $cache_staging ]] || rm -f -- "$cache_staging"; rm -rf -- "$run_dir"' EXIT
   trap 'exit 130' INT
   trap 'exit 143' TERM
-  print -l 'connect-timeout = 15' 'speed-time = 35' 'speed-limit = 1024' 'max-time = 900' > "$run_dir/curlrc" || exit 1
+  print -l 'connect-timeout = 15' 'speed-time = 35' 'speed-limit = 1024' 'max-time = 900' 'retry-all-errors' 'retry-max-time = 180' > "$run_dir/curlrc" || exit 1
   if ! run_brew update; then
     print -u2 '⚠️ Homebrew 更新失败，将继续尝试安装。'
     run_failed=1

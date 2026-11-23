@@ -7,7 +7,7 @@
 确认网络能访问 GitHub 和各软件的下载源，然后在 Mac 的终端粘贴这行命令：
 
 ```zsh
-zsh -c 'script=$(curl -fsSL --connect-timeout 15 --max-time 60 https://raw.githubusercontent.com/houjian19527629072-cloud/new-mac/main/install.sh) && [[ -n $script ]] && zsh -c "$script"'
+zsh -c 'script=$(curl -fsSL --connect-timeout 15 --max-time 60 --retry 2 --retry-all-errors --retry-max-time 90 https://raw.githubusercontent.com/houjian19527629072-cloud/new-mac/main/install.sh) && [[ -n $script ]] && zsh -c "$script"'
 ```
 
 - 选装可以输入 `4 8 10`、`4,8,10` 或 `4、8、10`。这三个编号对应 Claude Code、DeepSeek Harness 和 WorkBuddy 国内版。
